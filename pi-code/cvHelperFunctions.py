@@ -2,6 +2,23 @@ import numpy as np
 import cv2
 import sklearn.cluster as sk
 
+
+def fill_all_edges_black(img, show=True):
+    # takes in a black and white image and fills all regions bordering the edge black
+    for i in range(0, img.shape[0]):
+        if img[i, 0] != 0:
+            cv2.floodFill(img, None, (0, i), 0)
+        if img[i, img.shape[1] - 1] != 0:
+            cv2.floodFill(img, None, (img.shape[1] - 1, i), 0)
+
+    for i in range(0, img.shape[1]):
+        if img[0, i] != 0:
+            cv2.floodFill(img, None, (0, i), 0)
+        if img[img.shape[0] - 1, i] != 0:
+            cv2.floodFill(img, None, (img.shape[0] - 1, i), 0)
+    cv2.imshow("Filled image", img)
+
+
 def create_value_edges(img, show=False):
     hsv_img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     hue = hsv_img.copy()

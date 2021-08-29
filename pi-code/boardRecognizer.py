@@ -6,38 +6,17 @@ import board
 from datetime import datetime
 
 
-test_image_path = "test-images/IMG-0719.jpg"
+test_image_path = "test-images/IMG-0715.jpg"
 
 
 source_image = cv2.imread(test_image_path, cv2.IMREAD_COLOR)
-max_dim = 700
+max_dim = 1000
 
 source_image = hp.shrinkto(source_image, max_dim)
 
 
-def process(source_image):
-    test_image = source_image.copy()
-    test_image = cv2.medianBlur(test_image, 5)
+def contours_test(contours_image):
 
-    cv2.imshow("Blurred Image", test_image)
-    test_image = cv2.cvtColor(test_image, cv2.COLOR_BGR2HSV)
-
-    test_image[:, :, 1] = 0
-    test_image = cv2.cvtColor(test_image, cv2.COLOR_HSV2BGR)
-    test_image = cv2.cvtColor(test_image, cv2.COLOR_BGR2GRAY)
-    test_image = cv2.adaptiveThreshold(test_image, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 21, 8)
-    test_image = cv2.cvtColor(test_image, cv2.COLOR_GRAY2BGR)
-    cv2.imshow("Adaptive Threshold Image", test_image)
-    return test_image
-
-
-def contours_test():
-    contours_image = process(source_image).copy()
-    #ret, test_image = cv2.threshold(test_image, 127, 255, cv2.THRESH_BINARY)
-
-    # cv2.imshow("Not Adaptive", comp_image)
-
-    # contours approach
 
     contours = cv2.findContours(cv2.cvtColor(contours_image, cv2.COLOR_BGR2GRAY), cv2.RETR_EXTERNAL,
                                 cv2.CHAIN_APPROX_SIMPLE)
@@ -63,7 +42,7 @@ def contours_test():
 
 
 def houghlines_test():
-    test_image = process(source_image)
+    test_image = board.process(source_image)
     lines = cv2.HoughLines(hp.create_value_edges(test_image, show=True), 1, np.pi / 180, 120)
     if lines is not None:
         for arr in lines:
@@ -80,7 +59,8 @@ def board_test():
     my_board = board.Board(None)
     print(my_board)
 
-    board.board_image(source_image, [[89, 152], [94, 462], [403, 142]], max_dim)
+    # board.board_image(source_image, [[89, 152], [94, 462], [403, 142]], max_dim)
+    board.board_image(source_image, board.get_corners(source_image), max_dim)
 
 
 def blob_detection_test():
@@ -93,8 +73,15 @@ def blob_detection_test():
 
 new_image = source_image.copy()
 # houghlines_test()
+
+contours_image = board.process(source_image, 9).copy()
+cv2.imshow("Contours Image", contours_image)
+cv2.floodFill(contours_image, None, (0, 0), 0)
+contours_test(contours_image)
+cv2.waitKey()
 board_test()
-contours_test()
-houghlines_test()
+#contours_test()
+#houghlines_test()
+board.get_corners(source_image)
 cv2.waitKey(0)
 
